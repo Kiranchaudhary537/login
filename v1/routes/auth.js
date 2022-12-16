@@ -1,42 +1,92 @@
 const express = require("express");
-const { verify } = require("jsonwebtoken");
-const path = require("path");
-const app = express();
+const otpGenerator = require("otp-generator");
 const authrouter = express.Router();
-const { LogInModal } = require("./../modal/LogInModal");
+const { UserModal } = require("./../modal/LogInModal");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+require("dotenv").config();
+
 authrouter.route("/").get(authGet).post(authPost);
 authrouter.route("/verify").get(verifyGet).post(verfiyPost);
-require("./../config/db");
 
-function authGet(req, res) {
+const otp = otpGenerator.generate(6, {
+  lowerCaseAlphabets: false,
+  upperCaseAlphabets: false,
+  specialChars: false,
+});
+var uname;
+
+async function authGet(req, res) {
   res.sendFile("E:/Backend/public/login.html");
 }
 
-function authPost(req, res) {
-  const { email, password } = req.body;
-  const newUser = new LogInModal({
-    email: email,
-    password: password,
+async function authPost(req, res) {
+  const { username, password } = req.body;
+  console.log("otp " + otp);
+  const user = await UserModal.findOne({
+    username,
   });
-  newUser
-    .save()
-    .then((result) => {
+  if (!user) {
+    res.json({
+      result: "failed to  found user",
+      message: "user not found on database",
+    });
+  } else {
+    console.log(user);
+    uname = username;
+    const match = await bcrypt.compare(password, user.password);
+    console.log(match);
+    if (match) {
+      const token = jwt.sign({ otp: otp }, "kiran");
+      res.cookie("OTP", token, {
+        maxAge: 1000 * 60,
+        secure: true,
+        httpOnly: true,
+      });
       res.json({
         result: "suceess",
-        message: "saved",
+        message: "user found",
       });
-      res.redirect("/login/verify");
-    })
-    .catch((result) => console.log("not working"))
-    .finally((result) => {});
+      //res.redirect("/login/verify");
+    } else {
+      res.send("password not matched");
+    }
+  }
 }
 
-function verifyGet(req, res) {
+async function verifyGet(req, res) {
   res.sendFile("E:/Backend/public/verify.html");
 }
 
-function verfiyPost(req, res) {
-  res.redirect("/");
+async function verfiyPost(req, res) {
+  const { otp } = req.body;
+  console.log(otp);
+  try {
+    jwt.verify(otp, "kiran", (err, verifiedJwt) => {
+      if (err) {
+        res.send(err.message);
+      } else {
+        res.send(verifiedJwt);
+      }
+    });
+    const token = jwt.sign({ otp: otp }, "kiran");
+    res.cookie("IsLogIn", token, {
+      maxAge: 1000 * 60 * 60 * 24,
+      secure: true,
+      httpOnly: true,
+    });
+    await UserModal.findOneAndUpdate(
+      {
+        uname,
+      },
+      { lastActive: new Date().toISOString() }
+    );
+    //res.redirect("/");
+    res.send("done");
+  } catch (error) {
+    res.send(error.name);
+  }
 }
 
 module.exports = { authrouter };
