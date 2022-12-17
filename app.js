@@ -3,13 +3,17 @@ const path = require("path");
 const app = express();
 const port = 3000;
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-require("dotenv").config();
 var bodyParser = require("body-parser");
+
 const { authrouter } = require("./v1/routes/auth");
-const jwt = require("jsonwebtoken");
 const { UserModal } = require("./v1/modal/LogInModal");
+const protectRoute = require("./v1/middleware/protectedRoute");
+const { verifyrouter } = require("./v1/routes/verify");
+
+require("dotenv").config();
 
 const options = {
   connectTimeoutMS: 5000,
@@ -27,31 +31,54 @@ const db = mongoose
     console.log("error while connecting");
   });
 
+app.listen(port, () => {
+  console.log("port working");
+});
+
 // middleware
 app.use(express.json({ limit: "100mb" }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/static", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
+app.use("/login", authrouter);
+app.use("/login/verify", verifyrouter);
 
 // routing
-app.get("/", protectRoute, function (req, res) {
-  res.sendFile("E:/Backend/public/index.html");
+app.get("/", function (req, res) {
+  jwt.verify(
+    req.cookies.IsLogIn,
+    process.env.JWT_SECRET,
+    (err, verifiedJwt) => {
+      if (err) {
+        console.log("working");
+        res.redirect("/login");
+      } else {
+        res.sendFile("E:/Backend/public/index.html");
+      }
+    }
+  );
 });
-app.use("/login", authrouter);
 
-function protectRoute(req, res, next) {
-  console.log(req.cookies.IsLogIn);
-  if (req.cookies.IsLogIn == "true") {
-    console.log("working");
-    next();
-  } else {
-    res.redirect("/login");
-  }
-}
-app.listen(port, () => {
-  console.log("port working");
-});
+
+
+// function protectRoute(req, res, next) {
+//   console.log(req.cookies.IsLogIn);
+//   jwt
+//     .verify({ "username": "kiran" }, process.env.JWT_SECRET)
+//     .then(() => {
+//       console.log("jwt working");
+//     })
+//     .catch(() => {
+//       console.log("jwt not working");
+//     });
+//   if (req.cookies.IsLogIn == "true") {
+//     console.log("working");
+//     next();
+//   } else {
+//     res.redirect("/login");
+//   }
+// }
 
 app.post("/singup", async function (req, res) {
   const { email, password, username } = req.body;
@@ -74,8 +101,3 @@ app.post("/singup", async function (req, res) {
       res.end("error while adding data" + e);
     });
 });
-
-// app.get("/singup", function (req, res) {
-//   //console.log(req.cookies);
-//   res.send(req.cookies);
-// });
