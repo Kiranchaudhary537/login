@@ -5,9 +5,9 @@ const { UserModal } = require("./../modal/LogInModal");
 const bcrypt = require("bcrypt");
 const { sendMail } = require("../utility/emailServices");
 const { VerifyModal } = require("../modal/VerifyModal");
-const sendVerificationEmail = require("../utility/emailServices");
+const { queue } = require("../utility/publisher");
 require("dotenv").config();
-sendVerificationEmail;
+var amqp = require("amqplib/callback_api");
 authrouter.route("/").get(authGet).post(authPost);
 
 async function authGet(req, res) {
@@ -42,6 +42,37 @@ async function authPost(req, res) {
 
       try {
         sendMail({ to: "kiranchaudhary537@gmail.com", OTP: otp });
+        const details = [{ to: "kiranchaudhary537@gmail.com", OTP: otp }];
+        queue(details);
+        amqp.connect(process.env.AMQP_URI, function (error0, connection) {
+          if (error0) {
+            throw error0;
+          }
+          connection.createChannel(function (error1, channel) {
+            if (error1) {
+              throw error1;
+            }
+            var exchange = "login";
+            // var msg = process.argv.slice(2).join(" ") || "Hello World!";
+
+            channel.assertExchange(exchange, "fanout", {
+              durable: false,
+            });
+            channel.publish(
+              exchange,
+              "",
+              Buffer.from(
+                JSON.stringify({ to: "kiranchaudhary537@gmail.com", OTP: otp })
+              )
+            );
+            console.log(" [x] Sent %s", msg);
+          });
+
+          setTimeout(function () {
+            connection.close();
+            process.exit(0);
+          }, 500);
+        });
       } catch {
         (e) => {
           res.send(e.message);

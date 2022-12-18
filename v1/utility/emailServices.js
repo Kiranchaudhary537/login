@@ -19,6 +19,7 @@ const transport = nodemailer.createTransport({
 // });
 
 module.exports.sendMail = async (params) => {
+  console.log(params);
   try {
     let info = await transport.sendMail({
       from: "noreply@loginproject.com",
@@ -41,4 +42,3 @@ module.exports.sendMail = async (params) => {
     return false;
   }
 };
-

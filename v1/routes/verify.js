@@ -25,10 +25,16 @@ async function verfiyPost(req, res) {
       result: "failed to  found user",
       message: "user not found on database",
     });
+  } else if (user.expired <= Date.now()) {
+    res.json({
+      result: "failed",
+      message: "otp expired",
+    });
   } else {
-    console.log(user);
     const match = await bcrypt.compare(otp, user.otp);
-    console.log(match);
+    await VerifyModal.findOneAndDelete({
+      username,
+    });
     if (match) {
       const token = jwt.sign({ username: user }, process.env.JWT_SECRET, {
         expiresIn: "24h",

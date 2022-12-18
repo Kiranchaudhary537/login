@@ -6,6 +6,7 @@
     "start": "nodemon  app.js"
   },
   "dependencies": {
+    "amqplib": "^0.10.3",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.1",
     "cookie-parser": "~1.4.4",
@@ -23,4 +24,5 @@
     "nodemon": "^2.0.20",
     "otp-generator": "^4.0.0"
   }
+  
 }

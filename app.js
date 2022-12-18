@@ -7,14 +7,19 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
-
+const cors = require("cors");
 const { authrouter } = require("./v1/routes/auth");
 const { UserModal } = require("./v1/modal/LogInModal");
 const protectRoute = require("./v1/middleware/protectedRoute");
 const { verifyrouter } = require("./v1/routes/verify");
+const { consume } = require("./v1/utility/consumer");
+const { queue } = require("./v1/utility/publisher");
+
+// queue();
+require("./v1/utility/consumer.js");
+// import "./v1/utility/consumer.js";
 
 require("dotenv").config();
-
 const options = {
   connectTimeoutMS: 5000,
   useNewUrlParser: true,
@@ -41,6 +46,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/static", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:3000/",
+    credentials: true,
+  })
+);
 app.use("/login", authrouter);
 app.use("/login/verify", verifyrouter);
 
@@ -59,8 +70,6 @@ app.get("/", function (req, res) {
     }
   );
 });
-
-
 
 // function protectRoute(req, res, next) {
 //   console.log(req.cookies.IsLogIn);
