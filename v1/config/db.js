@@ -7,12 +7,14 @@ const options = {
   useUnifiedTopology: true,
 };
 mongoose.set("strictQuery", false);
-const db=mongoose
-  .connect(process.env.MONGO_URI, options)
-  .then(() => {
-    console.log("mangodb connected");
-  })
-  .catch(() => {
-    console.log("error while connecting");
-  });
-exports.module = db;
+const db = async () => {
+  mongoose
+    .connect(process.env.MONGO_URI, options)
+    .then(() => {
+      console.log("mangodb connected");
+    })
+    .catch(() => {
+      console.log("error while connecting");
+    });
+};
+module.exports = { db };

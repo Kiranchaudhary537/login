@@ -1,4 +1,5 @@
 var amqp = require("amqplib/callback_api");
+const { consume } = require("./consumer");
 require("dotenv").config();
 
 // const queue = amqp.connect(process.env.AMQP_URI, function (error0, connection) {
@@ -26,23 +27,28 @@ require("dotenv").config();
 // });
 
 const queue = async (msg) => {
-  amqp.connect(process.env.AMQP_URI, async function (err, connection) {
-    if (err) {
-      console.log("connection error");
-      throw err;
+  amqp.connect(process.env.AMQP_URI, function (error0, connection) {
+    if (error0) {
+      throw error0;
     }
-    const channel = await connection.createChannel();
-    if (channel == err) {
-      console.log("channel error");
-      throw err;
-    }
-    const exchange = "LogIn";
-    await channel.assertExchange(exchange, "fanout", { durable: false });
-    channel.publish(exchange, Buffer.from(JSON.stringify(msg)));
-    setTimeout(() => {
+    connection.createChannel(function (error1, channel) {
+      if (error1) {
+        throw error1;
+      }
+      var exchange = "LogIn";
+
+      channel.assertExchange(exchange, "fanout", {
+        durable: false,
+      });
+      channel.publish(exchange, "", Buffer.from(JSON.stringify(msg)));
+      console.log(" [x] Sent %s", msg);
+    });
+
+    setTimeout(function () {
+      consume();
       connection.close();
-      process.exit();
-    }, 1000);
+      process.exit(0);
+    }, 500);
   });
 };
 module.exports = { queue };

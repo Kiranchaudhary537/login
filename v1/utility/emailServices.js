@@ -5,9 +5,8 @@ const transport = nodemailer.createTransport({
   host: "smtp.mailtrap.io",
   port: 2525,
   auth: {
-    type: "custom",
-    user: "a09b30fcace66d",
-    pass: "a42f7d7746afe6",
+    user: process.env.MAIL_EMAIL,
+    pass: process.env.MAIL_PASSWORD,
   },
 });
 // const transport = nodemailer.createTransport({

@@ -5,14 +5,14 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { VerifyModal } = require("../modal/VerifyModal");
 
-verifyrouter.route("/").get(verifyGet).post(verfiyPost);
+verifyrouter.route("/").get(verifyGet).post(verifyPost);
 require("dotenv").config();
 
 async function verifyGet(req, res) {
   res.sendFile("E:/Backend/public/verify.html");
 }
 
-async function verfiyPost(req, res) {
+async function verifyPost(req, res) {
   const { otp } = req.body;
   const username = res.app.get("usernames");
   //   try {

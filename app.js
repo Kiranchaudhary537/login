@@ -10,32 +10,32 @@ var bodyParser = require("body-parser");
 const cors = require("cors");
 const { authrouter } = require("./v1/routes/auth");
 const { UserModal } = require("./v1/modal/LogInModal");
-const protectRoute = require("./v1/middleware/protectedRoute");
 const { verifyrouter } = require("./v1/routes/verify");
 const { consume } = require("./v1/utility/consumer");
-const { queue } = require("./v1/utility/publisher");
+const { db } = require("./v1/config/db");
 
-// queue();
-require("./v1/utility/consumer.js");
-// import "./v1/utility/consumer.js";
-
+consume();
 require("dotenv").config();
-const options = {
-  connectTimeoutMS: 5000,
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-};
 
-mongoose.set("strictQuery", false);
-const db = mongoose
-  .connect(process.env.MONGO_URI, options)
-  .then(() => {
-    console.log("mangodb connected");
-  })
-  .catch(() => {
-    console.log("error while connecting");
-  });
+// database connection
+db();
 
+// mongoose.set("strictQuery", false);
+// const options = {
+//   connectTimeoutMS: 5000,
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// };
+// mongoose
+//   .connect(process.env.MONGO_URI, options)
+//   .then(() => {
+//     console.log("mangodb connected");
+//   })
+//   .catch(() => {
+//     console.log("error while connecting");
+//   });
+
+// // server port
 app.listen(port, () => {
   console.log("port working");
 });
@@ -52,42 +52,27 @@ app.use(
     credentials: true,
   })
 );
+
+// routing
+app.get("/", protectRoute, function (req, res) {
+  res.status(200).sendFile("E:/Backend/public/index.html");
+});
 app.use("/login", authrouter);
 app.use("/login/verify", verifyrouter);
 
-// routing
-app.get("/", function (req, res) {
+function protectRoute(req, res, next) {
   jwt.verify(
     req.cookies.IsLogIn,
     process.env.JWT_SECRET,
     (err, verifiedJwt) => {
       if (err) {
-        console.log("working");
         res.redirect("/login");
       } else {
-        res.sendFile("E:/Backend/public/index.html");
+        next();
       }
     }
   );
-});
-
-// function protectRoute(req, res, next) {
-//   console.log(req.cookies.IsLogIn);
-//   jwt
-//     .verify({ "username": "kiran" }, process.env.JWT_SECRET)
-//     .then(() => {
-//       console.log("jwt working");
-//     })
-//     .catch(() => {
-//       console.log("jwt not working");
-//     });
-//   if (req.cookies.IsLogIn == "true") {
-//     console.log("working");
-//     next();
-//   } else {
-//     res.redirect("/login");
-//   }
-// }
+}
 
 app.post("/singup", async function (req, res) {
   const { email, password, username } = req.body;
