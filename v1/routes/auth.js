@@ -1,20 +1,19 @@
-const express = require("express");
-const otpGenerator = require("otp-generator");
-const authrouter = express.Router();
-const { UserModal } = require("./../modal/LogInModal");
-const bcrypt = require("bcrypt");
-const { VerifyModal } = require("../modal/VerifyModal");
-var amqp = require("amqplib/callback_api");
-// const { queue } = require("../utility/publisher");
-const {
+import express from "express";
+import otpGenerator from "otp-generator";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+import {
   findUserAndUpdate,
   findUserByUsername,
   saveNewOtpForUser,
-  findUserByUsernameForOto,
-} = require("../Database/user");
+  findUserByEmailForOto,
+} from "../Database/user.js";
 // const { sendMail } = require("../utility/emailServices");
 
-require("dotenv").config();
+const authrouter = express.Router();
+import env from "dotenv";
+env.config();
 
 authrouter.route("/").get(authGet).post(authPost);
 
@@ -108,19 +107,19 @@ async function authPost(req, res) {
     console.log(user);
     const match = await bcrypt.compare(password, user.password);
     if (match) {
-      res.app.set("usernames", username);
+      res.app.set("data", { email: user.email, otp: otp });
 
       const details = { to: user.email, OTP: otp };
 
       console.log(otp);
 
-      const User = await findUserByUsernameForOto(username);
+      const User = await findUserByEmailForOto(user.email);
 
       if (!User) {
-        saveNewOtpForUser(username, otp);
+        saveNewOtpForUser(user.email, otp);
       } else {
         console.log("user existed");
-        findUserAndUpdate(username, otp);
+        findUserAndUpdate(user.email, otp);
       }
       res.status(200).redirect("/login/verify");
     } else {
@@ -128,4 +127,5 @@ async function authPost(req, res) {
     }
   }
 }
-module.exports = { authrouter };
+
+export default authrouter;

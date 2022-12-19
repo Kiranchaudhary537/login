@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const VerifySchema = new Schema({
-  username: {
+  email: {
     type: String,
     required: true,
     unique: true,
@@ -21,4 +21,4 @@ const VerifySchema = new Schema({
   },
 });
 
-module.exports = { VerifySchema };
+export default VerifySchema;

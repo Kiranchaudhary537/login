@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-const { model } = mongoose;
-const { loginSchema } = require("./../schemas/LogInSchema");
+import mongoose from "mongoose";
+import loginSchema from "./../schemas/LogInSchema.js";
 const UserModal = mongoose.model("User", loginSchema);
-module.exports = { UserModal };
+export default UserModal;

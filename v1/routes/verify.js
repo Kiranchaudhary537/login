@@ -1,25 +1,28 @@
-const express = require("express");
+import express from "express";
 const verifyrouter = express.Router();
-const { UserModal } = require("./../modal/LogInModal");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { VerifyModal } = require("../modal/VerifyModal");
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import sendMail from "../utility/emailServices.js";
+import { findUserAndUpdate, findUserByEmailForOto } from "../Database/user.js";
 
 verifyrouter.route("/").get(verifyGet).post(verifyPost);
-require("dotenv").config();
+import env from "dotenv";
+env.config();
 
 async function verifyGet(req, res) {
   res.sendFile("E:/Backend/public/verify.html");
+  const { email, otp } = res.app.get("data");
+  res.app.set("data", { email: email, otp: otp });
+  sendMail({ to: email, OTP: otp });
 }
 
 async function verifyPost(req, res) {
-  const { otp } = req.body;
-  const username = res.app.get("usernames");
+  //const { otp } = req.body;
+  const { email, otp } = res.app.get("data");
+  console.log(email);
   //   try {
   console.log("otp " + otp);
-  const user = await VerifyModal.findOne({
-    username,
-  });
+  const user = await findUserByEmailForOto(email);
   if (!user) {
     res.json({
       result: "failed to  found user",
@@ -32,11 +35,9 @@ async function verifyPost(req, res) {
     });
   } else {
     const match = await bcrypt.compare(otp, user.otp);
-    await VerifyModal.findOneAndDelete({
-      username,
-    });
+    await findUserAndUpdate(email, otp);
     if (match) {
-      const token = jwt.sign({ username: user }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ email: user }, process.env.JWT_SECRET, {
         expiresIn: "24h",
       });
       res.cookie("IsLogIn", token, {
@@ -54,4 +55,4 @@ async function verifyPost(req, res) {
   //   }
 }
 
-module.exports = { verifyrouter };
+export default verifyrouter;

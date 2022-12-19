@@ -1,39 +1,44 @@
-const express = require("express");
-const path = require("path");
+import express from "express";
+import path from "path";
+import * as url from "url";
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
+import bodyParser from "body-parser";
+import cors from "cors";
+import amqp from "amqplib/callback_api.js";
+
+import sendMail from "./v1/utility/emailServices.js";
+// consume();
+import env from "dotenv";
+import authrouter from "./v1/routes/auth.js";
+import verifyrouter from "./v1/routes/verify.js";
+import UserModal from "./v1/modal/LogInModal.js";
+env.config();
 const app = express();
 const port = 3000;
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
-const cookieParser = require("cookie-parser");
-var bodyParser = require("body-parser");
-const cors = require("cors");
-const { authrouter } = require("./v1/routes/auth");
-const { UserModal } = require("./v1/modal/LogInModal");
-const { verifyrouter } = require("./v1/routes/verify");
-const { consume } = require("./v1/utility/consumer");
-const { db } = require("./v1/config/db");
-
-consume();
-require("dotenv").config();
 
 // database connection
-db();
+// db();
+mongoose.set("strictQuery", false);
+const options = {
+  connectTimeoutMS: 5000,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+};
+mongoose
+  .connect(process.env.MONGO_URI, options)
+  .then(() => {
+    console.log("mangodb connected");
+  })
+  .catch(() => {
+    console.log("error while connecting");
+  });
 
-// mongoose.set("strictQuery", false);
-// const options = {
-//   connectTimeoutMS: 5000,
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// };
-// mongoose
-//   .connect(process.env.MONGO_URI, options)
-//   .then(() => {
-//     console.log("mangodb connected");
-//   })
-//   .catch(() => {
-//     console.log("error while connecting");
-//   });
+
 
 // // server port
 app.listen(port, () => {
@@ -46,12 +51,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/static", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: "http://localhost:3000/",
-    credentials: true,
-  })
-);
+app.use(cors());
 
 // routing
 app.get("/", protectRoute, function (req, res) {

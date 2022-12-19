@@ -1,24 +1,24 @@
-const { UserModal } = require("./../modal/LogInModal");
-const bcrypt = require("bcrypt");
-const { VerifyModal } = require("../modal/VerifyModal");
+import bcrypt from "bcrypt";
+import UserModal from "../modal/LogInModal.js";
+import VerifyModal from "../modal/VerifyModal.js";
 
 // require("./../config/db");
 
-const findUserByUsername = async (username) => {
+export const findUserByUsername = async (username) => {
   const User = await UserModal.findOne({
     username,
   });
   return User;
 };
-const findUserByUsernameForOto = async (username) => {
+export const findUserByEmailForOto = async (email) => {
   const User = await VerifyModal.findOne({
-    username,
+    email,
   });
   return User;
 };
-const saveNewOtpForUser = async (username, otp) => {
+export const saveNewOtpForUser = async (email, otp) => {
   const newOTP = new VerifyModal({
-    username: username,
+    email: email,
     otp: bcrypt.hashSync(otp, 10),
     created: Date.now(),
     expired: Date.now() + 60000,
@@ -33,10 +33,10 @@ const saveNewOtpForUser = async (username, otp) => {
     });
 };
 
-const findUserAndUpdate = async (username, otp) => {
+export const findUserAndUpdate = async (email, otp) => {
   await VerifyModal.findOneAndUpdate(
     {
-      username,
+      email,
     },
     { expired: Date.now() + 60000, otp: bcrypt.hashSync(otp, 10) }
   )
@@ -47,9 +47,9 @@ const findUserAndUpdate = async (username, otp) => {
       return "failed" + e;
     });
 };
-const findUsernameAndDelete = async (username) => {
+export const findEmailAndDelete = async (email) => {
   await VerifyModal.findOneAndDelete({
-    username,
+    email,
   })
     .then(() => {
       return "success";
@@ -57,11 +57,4 @@ const findUsernameAndDelete = async (username) => {
     .catch((e) => {
       return "failed" + e;
     });
-};
-module.exports = {
-  findUserByUsername,
-  findUsernameAndDelete,
-  saveNewOtpForUser,
-  findUserAndUpdate,
-  findUserByUsernameForOto,
 };

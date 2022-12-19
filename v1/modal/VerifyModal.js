@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const { model } = mongoose;
-const { VerifySchema } = require("./../schemas/VerifySchema");
+import mongoose from "mongoose";
+import VerifySchema from "../schemas/VerifySchema.js";
 const VerifyModal = mongoose.model("Verify", VerifySchema);
-module.exports = { VerifyModal };
+
+export default VerifyModal;

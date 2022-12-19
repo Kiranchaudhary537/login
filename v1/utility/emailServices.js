@@ -1,12 +1,12 @@
-const nodemailer = require("nodemailer");
-require("dotenv").config();
-
+import nodemailer from "nodemailer";
+import env from "dotenv";
+env.config();
 const transport = nodemailer.createTransport({
   host: "smtp.mailtrap.io",
   port: 2525,
   auth: {
-    user: process.env.MAIL_EMAIL,
-    pass: process.env.MAIL_PASSWORD,
+    user: "b61749d59ad9a7",
+    pass: "4301c205302aa8",
   },
 });
 // const transport = nodemailer.createTransport({
@@ -17,7 +17,7 @@ const transport = nodemailer.createTransport({
 //   },
 // });
 
-module.exports.sendMail = async (params) => {
+const sendMail = async (params) => {
   console.log(params);
   try {
     let info = await transport.sendMail({
@@ -41,3 +41,4 @@ module.exports.sendMail = async (params) => {
     return false;
   }
 };
+export default sendMail;
