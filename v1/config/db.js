@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-require("dotenv").config();
-
+import mongoose from "mongoose";
+import env from "dotenv";
+env.config();
 const options = {
   connectTimeoutMS: 5000,
   useNewUrlParser: true,
@@ -17,4 +17,5 @@ const db = async () => {
       console.log("error while connecting");
     });
 };
-module.exports = { db };
+
+export default db;

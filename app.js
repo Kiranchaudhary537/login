@@ -1,46 +1,31 @@
 import express from "express";
 import path from "path";
 import * as url from "url";
-const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import cors from "cors";
-import amqp from "amqplib/callback_api.js";
-
-import sendMail from "./v1/utility/emailServices.js";
-// consume();
+import db from "./v1/config/db.js";
 import env from "dotenv";
 import authrouter from "./v1/routes/auth.js";
 import verifyrouter from "./v1/routes/verify.js";
 import UserModal from "./v1/modal/LogInModal.js";
+
+// configuations
 env.config();
 const app = express();
 const port = 3000;
 
+// rabbitmq's consumer running
+import "./v1/utility/consumer.js";
+
 // database connection
-// db();
-mongoose.set("strictQuery", false);
-const options = {
-  connectTimeoutMS: 5000,
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-};
-mongoose
-  .connect(process.env.MONGO_URI, options)
-  .then(() => {
-    console.log("mangodb connected");
-  })
-  .catch(() => {
-    console.log("error while connecting");
-  });
+db();
 
 
-
-// // server port
+//
 app.listen(port, () => {
   console.log("port working");
 });

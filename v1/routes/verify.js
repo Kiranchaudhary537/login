@@ -1,41 +1,39 @@
 import express from "express";
-const verifyrouter = express.Router();
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import sendMail from "../utility/emailServices.js";
-import { findUserAndUpdate, findUserByEmailForOto } from "../Database/user.js";
-
-verifyrouter.route("/").get(verifyGet).post(verifyPost);
+import { findEmailAndDelete, findUserByEmailForOto } from "../Database/user.js";
 import env from "dotenv";
 env.config();
 
+// router
+const verifyrouter = express.Router();
+verifyrouter.route("/").get(verifyGet).post(verifyPost);
+
+// get and post function
+
 async function verifyGet(req, res) {
   res.sendFile("E:/Backend/public/verify.html");
-  const { email, otp } = res.app.get("data");
-  res.app.set("data", { email: email, otp: otp });
-  sendMail({ to: email, OTP: otp });
 }
 
 async function verifyPost(req, res) {
-  //const { otp } = req.body;
-  const { email, otp } = res.app.get("data");
-  console.log(email);
-  //   try {
-  console.log("otp " + otp);
+  const { otp } = req.body;
+  const { email } = res.app.get("email");
+
   const user = await findUserByEmailForOto(email);
   if (!user) {
-    res.json({
+    res.status(404).json({
       result: "failed to  found user",
       message: "user not found on database",
     });
   } else if (user.expired <= Date.now()) {
-    res.json({
+    await findEmailAndDelete(email);
+    res.status(400).json({
       result: "failed",
       message: "otp expired",
     });
   } else {
     const match = await bcrypt.compare(otp, user.otp);
-    await findUserAndUpdate(email, otp);
+    await findEmailAndDelete(email);
     if (match) {
       const token = jwt.sign({ email: user }, process.env.JWT_SECRET, {
         expiresIn: "24h",
@@ -44,15 +42,11 @@ async function verifyPost(req, res) {
         maxAge: 1000 * 24 * 60 * 60,
         httpOnly: true,
       });
-      res.redirect("/");
+      res.status(300).redirect("/");
     } else {
-      res.send("not same otp");
+      res.status(400).send("not same otp");
     }
-    // res.end();
   }
-  //   } catch (error) {
-  //     res.send(error.name);
-  //   }
 }
 
 export default verifyrouter;

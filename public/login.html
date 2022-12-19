@@ -11,12 +11,49 @@
     <div class="login-page">
       <div class="form">
         <h1 id="header">Log In</h1>
-        <form action="/login" method="post" class="login-form">
-          <input type="text" name="username" placeholder="username" />
-          <input type="password" name="password" placeholder="password" />
-          <button>login</button>
-        </form>
+        <div class="login-form">
+          <span id="error" style="color: red"></span>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            onclick="getfocus()"
+            placeholder="username"
+          />
+          <input
+            type="password"
+            id="password"
+            name="password"
+            onclick="getfocus()"
+            placeholder="password"
+          />
+          <button id="button">login</button>
+        </div>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      const btn = document.getElementById("button");
+      function getfocus() {
+        document.getElementById("error").innerHTML = "";
+      }
+      btn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        const username = document.querySelector("input[type='text']").value;
+        const password = document.querySelector("input[type='password']").value;
+
+        await axios
+          .post("http://localhost:3000/login", { username, password })
+          .then((response) => {
+            console.log(response);
+            window.location.href = "/login/verify";
+          })
+          .catch((error) => {
+            console.error(error);
+            document.getElementById("error").innerHTML =
+              "you entered wrong password or username";
+          });
+      });
+    </script>
   </body>
 </html>

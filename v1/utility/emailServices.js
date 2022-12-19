@@ -9,18 +9,11 @@ const transport = nodemailer.createTransport({
     pass: "4301c205302aa8",
   },
 });
-// const transport = nodemailer.createTransport({
-//   service: 'gmail',
-//   auth: {
-//     user: process.env.MAIL_EMAIL,
-//     pass: process.env.MAIL_PASSWORD,
-//   },
-// });
+
 
 const sendMail = async (params) => {
-  console.log(params);
-  try {
-    let info = await transport.sendMail({
+  transport.sendMail(
+    {
       from: "noreply@loginproject.com",
       to: params.to,
       subject: "verification otp",
@@ -34,11 +27,14 @@ const sendMail = async (params) => {
           <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">${params.OTP}</h1>
      </div>
       `,
-    });
-    return info;
-  } catch (error) {
-    console.log(error);
-    return false;
-  }
+    },
+    (err, response) => {
+      if (err) {
+        console.log("error ", err);
+      } else {
+        console.log("responss", response);
+      }
+    }
+  );
 };
 export default sendMail;

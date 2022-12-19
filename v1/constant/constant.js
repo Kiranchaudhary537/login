@@ -1,14 +1,7 @@
-const EMAIL_TAKEN =
+export const EMAIL_TAKEN =
   "Another user has already been registered with this email address. Please login";
-const INCORRECT_PASSWORD = "Password is incorrect";
-const INVALID_USERNAME = "Invalid username";
-const INVALID_PASSWORD = "Invalid password";
-const INVALID_EMAIL = "Invalid email address";
-
-module.exports = {
-  EMAIL_TAKEN,
-  INCORRECT_PASSWORD,
-  INVALID_EMAIL,
-  INVALID_PASSWORD,
-  INVALID_USERNAME,
-};
+export const INCORRECT_PASSWORD = "Password is incorrect";
+export const INVALID_USERNAME = "Invalid username";
+export const INVALID_PASSWORD = "Invalid password";
+export const INVALID_EMAIL = "Invalid email address";
+export const INVALID_OTP = "Invalid otp ";
