@@ -19,11 +19,11 @@ amqp.connect(process.env.AMQP_URI, function (error0, connection) {
     });
 
     // listen and grab the data send by publisher and send mail
+    console.log("consumer started");
     channel.consume(
       "LogIn_Queue",
       function (msg) {
         let Msg = JSON.parse(msg.content.toString());
-
         sendMail(Msg);
       },
       {

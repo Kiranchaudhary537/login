@@ -33,9 +33,15 @@
                 window.location.href = "/";
               })
               .catch((error) => {
-                console.error(error);
-                document.getElementById("error").innerHTML =
-                  "you entered wrong otp";
+                if (error.response.status == 400) {
+                  document.getElementById("error").innerHTML =
+                    "you entered wrong otp";
+                } else if (error.response.status == 403) {
+                  document.getElementById("error").innerHTML = "otp expired ";
+                } else {
+                  document.getElementById("error").innerHTML =
+                    "there may server or other type of error";
+                }
               });
           });
         </script>

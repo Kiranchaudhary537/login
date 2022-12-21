@@ -27,7 +27,7 @@ async function verifyPost(req, res) {
     });
   } else if (user.expired <= Date.now()) {
     await findEmailAndDelete(email);
-    res.status(400).json({
+    res.status(403).json({
       result: "failed",
       message: "otp expired",
     });

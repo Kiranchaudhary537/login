@@ -24,7 +24,6 @@ import "./v1/utility/consumer.js";
 // database connection
 db();
 
-
 //
 app.listen(port, () => {
   console.log("port working");
@@ -40,7 +39,7 @@ app.use(cors());
 
 // routing
 app.get("/", protectRoute, function (req, res) {
-  res.status(200).sendFile("E:/Backend/public/index.html");
+  res.status(200).sendFile("./public/index.html", { root: __dirname });
 });
 app.use("/login", authrouter);
 app.use("/login/verify", verifyrouter);

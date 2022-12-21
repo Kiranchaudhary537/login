@@ -49,9 +49,16 @@
             window.location.href = "/login/verify";
           })
           .catch((error) => {
-            console.error(error);
-            document.getElementById("error").innerHTML =
-              "you entered wrong password or username";
+            if (error.response.status == 400) {
+              document.getElementById("error").innerHTML =
+                "you entered wrong password";
+            } else if (error.response.status == 404) {
+              document.getElementById("error").innerHTML =
+                "there is not username ";
+            } else {
+              document.getElementById("error").innerHTML =
+                "there may server or other type of error";
+            }
           });
       });
     </script>

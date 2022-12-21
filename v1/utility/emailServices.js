@@ -2,19 +2,18 @@ import nodemailer from "nodemailer";
 import env from "dotenv";
 env.config();
 const transport = nodemailer.createTransport({
-  host: "smtp.mailtrap.io",
-  port: 2525,
+  service: "gmail",
   auth: {
-    user: "b61749d59ad9a7",
-    pass: "4301c205302aa8",
+    user: process.env.GMAIL_EMAIL,
+    pass: process.env.GMAIL_PASSWORD,
   },
 });
 
-
 const sendMail = async (params) => {
+  console.log(process.env.EMAIL);
   transport.sendMail(
     {
-      from: "noreply@loginproject.com",
+      from: process.env.GMAIL_EMAIL,
       to: params.to,
       subject: "verification otp",
       html: `
