@@ -24,7 +24,7 @@ export const saveNewOtpForUser = async (email, otp) => {
     email: email,
     otp: bcrypt.hashSync(otp, 10),
     created: Date.now(),
-    expired: Date.now() + 60000,
+    expired: Date.now() + 120000,
   });
 
   await newOTP

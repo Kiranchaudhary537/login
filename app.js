@@ -7,11 +7,11 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import cors from "cors";
-import db from "./v1/config/db.js";
+import db from "./src/config/db.js";
 import env from "dotenv";
-import authrouter from "./v1/routes/auth.js";
-import verifyrouter from "./v1/routes/verify.js";
-import UserModal from "./v1/modal/LogInModal.js";
+import authrouter from "./src/routes/auth.js";
+import verifyrouter from "./src/routes/verify.js";
+import UserModal from "./src/modal/LogInModal.js";
 
 // configuations
 env.config();
@@ -19,7 +19,7 @@ const app = express();
 const port = 3000;
 
 // rabbitmq's consumer running
-import "./v1/utility/consumer.js";
+import "./src/utility/consumer.js";
 
 // database connection
 db();
@@ -38,24 +38,41 @@ app.use(cookieParser());
 app.use(cors());
 
 // routing
-app.get("/", protectRoute, function (req, res) {
-  res.status(200).sendFile("./public/index.html", { root: __dirname });
+app.post("/", function (req, res) {
+  const { IsLogIn } = req.body;
+  jwt.verify(IsLogIn, process.env.JWT_SECRET, (err, verifiedJwt) => {
+    if (err) {
+      res.status(400).send("no user login");
+      // res.redirect("/login");
+    } else {
+      res.status(200).send("success");
+    }
+  });
 });
 app.use("/login", authrouter);
 app.use("/login/verify", verifyrouter);
 
 function protectRoute(req, res, next) {
-  jwt.verify(
-    req.cookies.IsLogIn,
-    process.env.JWT_SECRET,
-    (err, verifiedJwt) => {
-      if (err) {
-        res.redirect("/login");
-      } else {
-        next();
-      }
+  const { IsLogIn } = req.body;
+  jwt.verify(IsLogIn, process.env.JWT_SECRET, (err, verifiedJwt) => {
+    if (err) {
+      res.status(400).send("no user login");
+      // res.redirect("/login");
+    } else {
+      next();
     }
-  );
+  });
+  // jwt.verify(
+  //   req.cookies.IsLogIn,
+  //   process.env.JWT_SECRET,
+  //   (err, verifiedJwt) => {
+  //     if (err) {
+  //       res.redirect("/login");
+  //     } else {
+  //       next();
+  //     }
+  //   }
+  // );
 }
 
 app.post("/singup", async function (req, res) {

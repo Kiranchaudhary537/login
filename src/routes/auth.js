@@ -19,34 +19,38 @@ async function authGet(req, res) {
 
 async function authPost(req, res) {
   const { username, password } = req.body;
-
   const otp = otpGenerator.generate(6, {
     lowerCaseAlphabets: false,
     upperCaseAlphabets: false,
     specialChars: false,
   });
-
   const user = await findUserByUsername(username);
   if (!user) {
-    res.status(404).json({
+    res.status(400).json({
       result: "failed to  found user",
       message: "user not found on database",
     });
   } else {
+    console.log(user);
     const match = await bcrypt.compare(password, user.password);
     if (match) {
       res.app.set("email", { email: user.email });
+
       const User = await findUserByEmailForOto(user.email);
+
       if (!User) {
         saveNewOtpForUser(user.email, otp);
       } else {
+        console.log("user existed");
         findUserAndUpdate(user.email, otp);
       }
-      res.status(300).redirect("/login/verify");
+      // res.redirect("/login/verify");
+      res.status(200).send("sucess");
     } else {
       res.status(400).send("password not matched");
     }
   }
 }
+
 
 export default authrouter;

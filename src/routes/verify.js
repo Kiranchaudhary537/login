@@ -20,13 +20,15 @@ async function verifyPost(req, res) {
   const { email } = res.app.get("email");
 
   const user = await findUserByEmailForOto(email);
+
   if (!user) {
+    console.log("user not found");
     res.status(404).json({
       result: "failed to  found user",
       message: "user not found on database",
     });
   } else if (user.expired <= Date.now()) {
-    await findEmailAndDelete(email);
+    // await findEmailAndDelete(email);
     res.status(403).json({
       result: "failed",
       message: "otp expired",
@@ -38,13 +40,16 @@ async function verifyPost(req, res) {
       const token = jwt.sign({ email: user }, process.env.JWT_SECRET, {
         expiresIn: "24h",
       });
-      res.cookie("IsLogIn", token, {
-        maxAge: 1000 * 24 * 60 * 60,
-        httpOnly: true,
+      res.status(200).send({
+        ok: true,
+        token: token,
+        message: "USER_LOGIN_SUCCESS",
       });
-      res.status(300).redirect("/");
     } else {
-      res.status(400).send("not same otp");
+      res.status(400).json({
+        result: "failed",
+        message: "not same otp",
+      });
     }
   }
 }
