@@ -17,10 +17,7 @@ const sendMail = async (params) => {
       to: params.to,
       subject: "verification otp",
       html: `
-        <div
-          class="container"
-          style="max-width: 90%; margin: auto; padding-top: 20px"
-        >
+        <div class="container" style="max-width: 90%; margin: auto; padding-top: 20px" >
           <h2>Thanks for using 2 Factor authentication</h2>
           <p style="margin-bottom: 30px;">Pleas enter the sign up OTP to get started</p>
           <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">${params.OTP}</h1>
