@@ -26,7 +26,7 @@ async function authPost(req, res) {
   });
   const user = await findUserByUsername(username);
   if (!user) {
-    res.status(400).json({
+    res.status(404).json({
       result: "failed to  found user",
       message: "user not found on database",
     });
@@ -51,6 +51,5 @@ async function authPost(req, res) {
     }
   }
 }
-
 
 export default authrouter;

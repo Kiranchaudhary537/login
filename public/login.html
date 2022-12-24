@@ -41,26 +41,30 @@
         e.preventDefault();
         const username = document.querySelector("input[type='text']").value;
         const password = document.querySelector("input[type='password']").value;
-
-        await axios
-          .post("http://localhost:3000/login", { username, password })
-          .then((response) => {
-            console.log(response);
-            window.location.href = "verify.html";
-          })
-          .catch((error) => {
-            if (error.response.status == 400) {
-              document.getElementById("error").innerHTML =
-                "you entered wrong password";
-            } else if (error.response.status == 404) {
-              document.getElementById("error").innerHTML =
-                "there is not username ";
-            } else if (error.response.status == 300) {
-            } else {
-              document.getElementById("error").innerHTML =
-                "there may server or other type of error";
-            }
-          });
+        if (username.trim() == "" || password.trim() == "") {
+          document.getElementById("error").innerHTML = "fill form";
+        } else {
+          await axios
+            .post("http://localhost:3000/login", { username, password })
+            .then((response) => {
+              console.log(response);
+              window.location.href = "verify.html";
+            })
+            .catch((error) => {
+              console.log(error.response.status);
+              if (error.response.status == 400) {
+                document.getElementById("error").innerHTML =
+                  "you entered wrong password";
+              } else if (error.response.status == 404) {
+                document.getElementById("error").innerHTML =
+                  "there is not username ";
+              } else if (error.response.status == 300) {
+              } else {
+                document.getElementById("error").innerHTML =
+                  "there may server or other type of error";
+              }
+            });
+        }
       });
     </script>
   </body>

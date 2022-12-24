@@ -30,9 +30,9 @@ export const saveNewOtpForUser = async (email, otp) => {
   await newOTP
     .save()
     .then(() => {
-      // producer for "LogIn_Queue";
 
-      amqp.connect(process.env.AMQP_URI, function (error0, connection) {
+      // producer for "LogIn_Queue";
+     amqp.connect(process.env.AMQP_URI, function (error0, connection) {
         if (error0) {
           throw error0;
         }
