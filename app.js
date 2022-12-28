@@ -14,6 +14,7 @@ import verifyrouter from "./src/routes/verify.js";
 import UserModal from "./src/modal/LogInModal.js";
 // import { Worker } from "worker_threads";
 import consumer from "./src/utility/consumer.js";
+// import consumer from "./src/utility/consumer.js";
 
 // configuations
 env.config();
@@ -22,6 +23,16 @@ const port = process.env.PORT || 3000;
 
 // rabbitmq's consumer running
 consumer();
+// async function createThread() {
+//   const newThread = new Worker(
+//     path.join(__dirname + "src/utility/consumer.js")
+//   );
+//   newThread.on("message", (result) => {
+//     console.log("main thread: " + result);
+//   });
+//   newThread.postMessage("parent thread");
+// }
+// createThread();
 
 // database connection
 db();
@@ -31,7 +42,7 @@ app.listen(port, () => {
 });
 
 // middleware
-// app.all("*", createThread);
+
 app.use(express.json({ limit: "100mb" }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -39,19 +50,9 @@ app.use("/static", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
 app.use(cors());
 
-// function createThread() {
-//   console.log("thread working");
-
-//   const newThread = new Worker(__dirname + "./src/utility/consumer.js");
-//   newThread.on("message", (result) => {
-//     console.log("thread api" + result);
-//   });
-//   newThread.postMessage(1);
-// }
-
 // routing
-app.get("/", function (req, res) {
-  res.status(200).send("sever running");
+app.get("/", protectRoute, function (req, res) {
+  res.status(200).sendFile(path.join(__dirname + "/public/index.html"));
 });
 
 app.post("/", function (req, res) {
@@ -64,6 +65,7 @@ app.post("/", function (req, res) {
     }
   });
 });
+
 app.use("/login", authrouter);
 app.use("/login/verify", verifyrouter);
 
@@ -71,7 +73,7 @@ function protectRoute(req, res, next) {
   const { IsLogIn } = req.body;
   jwt.verify(IsLogIn, process.env.JWT_SECRET, (err, verifiedJwt) => {
     if (err) {
-      res.status(400).send("no user login");
+      res.status(300).redirect("/login");
     } else {
       next();
     }

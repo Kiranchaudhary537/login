@@ -5,6 +5,30 @@ import amqp from "amqplib/callback_api.js";
 import env from "dotenv";
 env.config();
 
+const sendToQueue = async (email, otp) => {
+  amqp.connect(process.env.AMQP_URI, function (error0, connection) {
+    if (error0) {
+      throw error0;
+    }
+    connection.createChannel(function (error1, channel) {
+      if (error1) {
+        throw error1;
+      }
+
+      channel.assertQueue("LogIn_Queue", {
+        durable: false,
+      });
+
+      // send the json-stringified data to the consumer
+      // consumer will push the email sending process in a queue
+      channel.sendToQueue(
+        "LogIn_Queue",
+        Buffer.from(JSON.stringify({ to: email, OTP: otp }))
+      );
+    });
+  });
+};
+
 export const findUserByUsername = async (username) => {
   const User = await UserModal.findOne({
     username,
@@ -30,27 +54,8 @@ export const saveNewOtpForUser = async (email, otp) => {
   await newOTP
     .save()
     .then(() => {
-
       // producer for "LogIn_Queue";
-     amqp.connect(process.env.AMQP_URI, function (error0, connection) {
-        if (error0) {
-          throw error0;
-        }
-        connection.createChannel(function (error1, channel) {
-          if (error1) {
-            throw error1;
-          }
-
-          channel.assertQueue("LogIn_Queue", {
-            durable: false,
-          });
-
-          channel.sendToQueue(
-            "LogIn_Queue",
-            Buffer.from(JSON.stringify({ to: email, OTP: otp }))
-          );
-        });
-      });
+      sendToQueue(email, otp);
 
       return "success";
     })
@@ -68,27 +73,7 @@ export const findUserAndUpdate = async (email, otp) => {
   )
     .then(() => {
       // producer for "LogIn_Queue";
-      amqp.connect(process.env.AMQP_URI, function (error0, connection) {
-        if (error0) {
-          throw error0;
-        }
-        connection.createChannel(function (error1, channel) {
-          if (error1) {
-            throw error1;
-          }
-
-          channel.assertQueue("LogIn_Queue", {
-            durable: false,
-          });
-
-          // send the json-stringified data to the consumer
-          // consumer will push the email sending process in a queue
-          channel.sendToQueue(
-            "LogIn_Queue",
-            Buffer.from(JSON.stringify({ to: email, OTP: otp }))
-          );
-        });
-      });
+      sendToQueue(email, otp);
       return "sucess";
     })
     .catch((e) => {

@@ -1,6 +1,10 @@
 import express from "express";
 import otpGenerator from "otp-generator";
 import bcrypt from "bcrypt";
+import path from "path";
+import * as url from "url";
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+
 import {
   findUserAndUpdate,
   findUserByUsername,
@@ -14,7 +18,7 @@ authrouter.route("/").get(authGet).post(authPost);
 
 // get and post functions
 async function authGet(req, res) {
-  res.status(200).sendFile("E:/Backend/public/login.html");
+  res.status(200).sendFile(path.join(__dirname + "/../../public/login.html"));
 }
 
 async function authPost(req, res) {
@@ -31,7 +35,6 @@ async function authPost(req, res) {
       message: "user not found on database",
     });
   } else {
-    console.log(user);
     const match = await bcrypt.compare(password, user.password);
     if (match) {
       res.app.set("email", { email: user.email });
@@ -41,10 +44,14 @@ async function authPost(req, res) {
       if (!User) {
         saveNewOtpForUser(user.email, otp);
       } else {
-        console.log("user existed");
         findUserAndUpdate(user.email, otp);
       }
+
       // res.redirect("/login/verify");
+      // console.log("user existed");
+      // res.status(200).redirect("login/verify");
+      // res.redirect(307, "/login/verify");
+      //for external
       res.status(200).send("sucess");
     } else {
       res.status(400).send("password not matched");

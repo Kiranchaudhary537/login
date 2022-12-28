@@ -1,7 +1,7 @@
 import amqp from "amqplib/callback_api.js";
 import env from "dotenv";
 import sendMail from "./emailServices.js";
-import { parentPort } from "worker_threads";
+// import { parentPort } from "worker_threads";
 env.config();
 async function consumer() {
   amqp.connect(process.env.AMQP_URI, function (error0, connection) {
@@ -34,6 +34,9 @@ async function consumer() {
   });
 }
 export default consumer;
-// parentPort.on("thread", () => {
-//   parentPort.postMessage(consumer());
+
+// parentPort.on("message", (message) => {
+//   console.log("message: " + message);
+//   consumer();
+//   parentPort.postMessage("sub thread");
 // });
