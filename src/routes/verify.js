@@ -51,13 +51,13 @@ async function verifyPost(req, res) {
         });
 
         //server login form
-        // res.status(200).redirect("/");
+        res.status(200).redirect("/");
         // external api use
-        res.status(200).send({
-          ok: true,
-          token: token,
-          message: "USER_LOGIN_SUCCESS",
-        });
+        // res.status(200).send({
+        //   ok: true,
+        //   token: token,
+        //   message: "USER_LOGIN_SUCCESS",
+        // });
         // res.redirect(307, "/");
       })
       .catch(() => {
