@@ -37,8 +37,11 @@ async function authPost(req, res) {
   } else {
     const match = await bcrypt.compare(password, user.password);
     if (match) {
+
+      // set email so other route can use email
       res.app.set("email", { email: user.email });
 
+      //user email for otop
       const User = await findUserByEmailForOto(user.email);
 
       if (!User) {
@@ -46,12 +49,6 @@ async function authPost(req, res) {
       } else {
         findUserAndUpdate(user.email, otp);
       }
-
-      // res.redirect("/login/verify");
-      // console.log("user existed");
-      // res.status(200).redirect("login/verify");
-      // res.redirect(307, "/login/verify");
-      //for external
       res.status(200).send("sucess");
     } else {
       res.status(400).send("password not matched");

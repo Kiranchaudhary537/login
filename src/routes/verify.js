@@ -50,15 +50,11 @@ async function verifyPost(req, res) {
           httpOnly: true,
         });
 
-        //server login form
-        // res.status(200).redirect("/");
-        // external api use
         res.status(200).send({
           ok: true,
           token: token,
           message: "USER_LOGIN_SUCCESS",
         });
-        // res.redirect(307, "/");
       })
       .catch(() => {
         res.status(400).json({
