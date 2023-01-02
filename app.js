@@ -12,9 +12,7 @@ import env from "dotenv";
 import authrouter from "./src/routes/auth.js";
 import verifyrouter from "./src/routes/verify.js";
 import UserModal from "./src/modal/LogInModal.js";
-// import { Worker } from "worker_threads";
 import consumer from "./src/utility/consumer.js";
-// import consumer from "./src/utility/consumer.js";
 
 // configuations
 env.config();
@@ -23,16 +21,6 @@ const port = process.env.PORT || 3000;
 
 // rabbitmq's consumer running
 consumer();
-// async function createThread() {
-//   const newThread = new Worker(
-//     path.join(__dirname + "src/utility/consumer.js")
-//   );
-//   newThread.on("message", (result) => {
-//     console.log("main thread: " + result);
-//   });
-//   newThread.postMessage("parent thread");
-// }
-// createThread();
 
 // database connection
 db();
@@ -51,66 +39,19 @@ app.use(cookieParser());
 app.use(cors());
 
 // routing
-app.get("/", protectRoute, function (req, res) {
-  res.status(200).sendFile(path.join(__dirname + "/public/index.html"));
-});
-
-app.post("/", function (req, res) {
-  const { IsLogIn } = req.body;
-  jwt.verify(IsLogIn, process.env.JWT_SECRET, (err, verifiedJwt) => {
-    if (err) {
-      res.status(400).send("no user login");
-    } else {
-      res.status(200).send("success");
+app.get("/", function (req, res) {
+  jwt.verify(
+    req.cookies.IsLogIn,
+    process.env.JWT_SECRET,
+    (err, verifiedJwt) => {
+      if (err) {
+        res.status(300).redirect("/login");
+      } else {
+        res.status(200).sendFile(path.join(__dirname + "/public/index.html"));
+      }
     }
-  });
+  );
 });
 
 app.use("/login", authrouter);
 app.use("/login/verify", verifyrouter);
-
-function protectRoute(req, res, next) {
-  const { IsLogIn } = req.body;
-  jwt.verify(IsLogIn, process.env.JWT_SECRET, (err, verifiedJwt) => {
-    if (err) {
-      res.status(300).redirect("/login");
-    } else {
-      next();
-    }
-  });
-  // jwt.verify(
-  //   req.cookies.IsLogIn,
-  //   process.env.JWT_SECRET,
-  //   (err, verifiedJwt) => {
-  //     if (err) {
-  //       res.redirect("/login");
-  //     } else {
-  //       next();
-  //     }
-  //   }
-  // );
-}
-
-app.post("/singup", async function (req, res) {
-  const { email, password, username } = req.body;
-  if (email.trim() == "" || password.trim() == "" || username.trim() == "") {
-    res.status(400).send("no form data found");
-    return;
-  }
-  const newUser = new UserModal({
-    email: email,
-    username: username,
-    password: bcrypt.hashSync(password, 10),
-    lastActive: new Date().toISOString(),
-  });
-  await newUser
-    .save()
-    .then(() => {
-      console.log("successfully added");
-      res.end("success fully added");
-    })
-    .catch((e) => {
-      console.log(e);
-      res.end("error while adding data" + e);
-    });
-});
